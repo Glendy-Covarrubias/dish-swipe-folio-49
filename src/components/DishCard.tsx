@@ -1,22 +1,18 @@
 
 import { useState } from 'react';
 import { motion, PanInfo, useAnimation } from 'framer-motion';
-import { Star, X, Heart } from 'lucide-react';
+import { Star, X, Heart, MessageCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Dish } from '@/types/dish';
 
 interface DishCardProps {
-  dish: {
-    id: string;
-    name: string;
-    restaurant: string;
-    price: string;
-    image: string;
-    tags: string[];
-  };
-  onSwipe: (direction: 'left' | 'right') => void;
+  dish: Dish;
+  onSwipe: (direction: 'left' | 'right', dishId: string) => void;
+  likesCount: number;
+  dislikesCount: number;
 }
 
-const DishCard = ({ dish, onSwipe }: DishCardProps) => {
+const DishCard = ({ dish, onSwipe, likesCount, dislikesCount }: DishCardProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const controls = useAnimation();
 
@@ -31,7 +27,7 @@ const DishCard = ({ dish, onSwipe }: DishCardProps) => {
         opacity: 0,
         transition: { duration: 0.3 }
       });
-      onSwipe(direction);
+      onSwipe(direction, dish.id);
     } else {
       controls.start({ x: 0, transition: { type: 'spring', stiffness: 300, damping: 20 } });
     }
@@ -50,7 +46,7 @@ const DishCard = ({ dish, onSwipe }: DishCardProps) => {
     >
       <div className="relative h-[70vh] w-full">
         <img
-          src={dish.image}
+          src={dish.image_url}
           alt={dish.name}
           className="w-full h-full object-cover"
         />
@@ -64,26 +60,32 @@ const DishCard = ({ dish, onSwipe }: DishCardProps) => {
               </Badge>
             ))}
           </div>
-          <p className="text-xl font-semibold">{dish.price}</p>
+          <div className="flex items-center justify-between">
+            <p className="text-xl font-semibold">{dish.price}</p>
+            <div className="flex gap-3 items-center">
+              <div className="flex items-center">
+                <Heart className="w-5 h-5 text-green-500 mr-1" />
+                <span>{likesCount}</span>
+              </div>
+              <div className="flex items-center">
+                <X className="w-5 h-5 text-red-500 mr-1" />
+                <span>{dislikesCount}</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       
       <div className="absolute bottom-0 left-0 right-0 flex justify-center gap-8 p-4">
         <button
           className="p-4 rounded-full bg-red-500/20 hover:bg-red-500/30 transition-colors"
-          onClick={() => onSwipe('left')}
+          onClick={() => onSwipe('left', dish.id)}
         >
           <X className="w-8 h-8 text-red-500" />
         </button>
         <button
-          className="p-4 rounded-full bg-blue-500/20 hover:bg-blue-500/30 transition-colors"
-          onClick={() => onSwipe('right')}
-        >
-          <Star className="w-8 h-8 text-blue-500" />
-        </button>
-        <button
           className="p-4 rounded-full bg-green-500/20 hover:bg-green-500/30 transition-colors"
-          onClick={() => onSwipe('right')}
+          onClick={() => onSwipe('right', dish.id)}
         >
           <Heart className="w-8 h-8 text-green-500" />
         </button>
