@@ -103,17 +103,24 @@ const Index = () => {
       <div className="min-h-screen bg-app-dark">
         <TopNav />
         <main className="pt-20 px-4 flex items-center justify-center h-[calc(100vh-5rem)]">
-          <p>Ordenes de pruebas (ocupar estos ejemplo para la captura de orden):</p>
-          <ul>
-            <li>ORD-20250311-8745</li>
-            <li>ORD-20250311-8746</li>
-          </ul>
-          <OrderEntry onOrderSubmit={handleOrderSubmit} />
-          {orderNumber && dishes?.length === 0 && (
-            <div className="mt-4 text-center text-app-muted">
-              <p>No dishes found for this order. Try another order number or contact support.</p>
-            </div>
-          )}
+          {/* Primera fila: Texto y lista de órdenes de prueba */}
+          <div className="w-full text-center">
+            {/* Quisas mas adelante puedo cambiar esto a un selector para solo el usuario eliga su # de orden */}
+            <p>Órdenes de prueba (ocupar estos ejemplos para la captura de orden):</p>
+            <ul className="mt-2">
+              <li>ORD-20250311-8745</li>
+              <li>ORD-20250311-8746</li>
+            </ul>
+          </div>
+          {/* Segunda fila: Entrada de orden y mensaje de error */}
+          <div className="w-full flex flex-col items-center">
+            <OrderEntry onOrderSubmit={handleOrderSubmit} />
+            {orderNumber && dishes?.length === 0 && (
+              <div className="mt-4 text-center text-app-muted">
+                <p>No dishes found for this order. Try another order number or contact support.</p>
+              </div>
+            )}
+          </div>
         </main>
       </div>
     );
