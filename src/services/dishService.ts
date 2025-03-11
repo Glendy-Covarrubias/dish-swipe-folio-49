@@ -45,6 +45,23 @@ export const getDishRatings = async (dish_id: string): Promise<Rating[]> => {
   })) || [];
 };
 
+export const getRatingsCount = async (dish_id: string): Promise<{ likes: number; dislikes: number }> => {
+  const { data, error } = await supabase
+    .from('ratings')
+    .select('rating')
+    .eq('dish_id', dish_id);
+
+  if (error) {
+    console.error('Error fetching ratings count:', error);
+    return { likes: 0, dislikes: 0 };
+  }
+
+  return {
+    likes: data?.filter(r => r.rating === 'like').length || 0,
+    dislikes: data?.filter(r => r.rating === 'dislike').length || 0
+  };
+};
+
 export const subscribeToRatings = (
   callback: (payload: any) => void
 ) => {

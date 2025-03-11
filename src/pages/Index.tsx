@@ -4,29 +4,39 @@ import { useQuery } from '@tanstack/react-query';
 import TopNav from '@/components/TopNav';
 import DishCard from '@/components/DishCard';
 import { useToast } from '@/components/ui/use-toast';
-import { fetchDishes, submitRating, subscribeToRatings } from '@/services/dishService';
+import { fetchDishes, submitRating, getRatingsCount, subscribeToRatings } from '@/services/dishService';
 import { Dish, Rating } from '@/types/dish';
 import { Loader2 } from 'lucide-react';
 
 const Index = () => {
   const [currentDishIndex, setCurrentDishIndex] = useState(0);
-  const [ratings, setRatings] = useState<Record<string, Rating[]>>({});
+  const [ratingsCount, setRatingsCount] = useState<Record<string, { likes: number; dislikes: number }>>({});
   const { toast } = useToast();
 
-  // Fetch dishes from Supabase
   const { data: dishes, isLoading, error } = useQuery({
     queryKey: ['dishes'],
     queryFn: fetchDishes,
   });
 
+  // Fetch initial ratings count for current dish
+  useEffect(() => {
+    const fetchRatingsCount = async () => {
+      if (dishes && dishes[currentDishIndex]) {
+        const dishId = dishes[currentDishIndex].id;
+        const counts = await getRatingsCount(dishId);
+        setRatingsCount(prev => ({ ...prev, [dishId]: counts }));
+      }
+    };
+    fetchRatingsCount();
+  }, [currentDishIndex, dishes]);
+
   // Set up realtime subscription to ratings
   useEffect(() => {
-    const unsubscribe = subscribeToRatings((payload) => {
+    const unsubscribe = subscribeToRatings(async (payload) => {
       const newRating = payload.new as Rating;
-      setRatings(prev => {
-        const dishRatings = [...(prev[newRating.dish_id] || []), newRating];
-        return { ...prev, [newRating.dish_id]: dishRatings };
-      });
+      const dishId = newRating.dish_id;
+      const counts = await getRatingsCount(dishId);
+      setRatingsCount(prev => ({ ...prev, [dishId]: counts }));
     });
 
     return () => {
@@ -34,7 +44,6 @@ const Index = () => {
     };
   }, []);
 
-  // Handle swipe action
   const handleSwipe = async (direction: 'left' | 'right', dishId: string) => {
     const rating = direction === 'right' ? 'like' : 'dislike';
     const message = direction === 'right' ? 'Loved it! 😋' : 'Maybe next time 👋';
@@ -54,18 +63,9 @@ const Index = () => {
       console.error('Error submitting rating:', error);
     }
     
-    // Move to next dish
     setCurrentDishIndex((prev) => 
       prev < (dishes?.length || 1) - 1 ? prev + 1 : 0
     );
-  };
-
-  // Calculate likes and dislikes for the current dish
-  const getLikesAndDislikes = (dishId: string) => {
-    const dishRatings = ratings[dishId] || [];
-    const likes = dishRatings.filter(r => r.rating === 'like').length;
-    const dislikes = dishRatings.filter(r => r.rating === 'dislike').length;
-    return { likes, dislikes };
   };
 
   if (isLoading) {
@@ -91,7 +91,7 @@ const Index = () => {
   }
 
   const currentDish = dishes[currentDishIndex];
-  const { likes, dislikes } = getLikesAndDislikes(currentDish.id);
+  const currentRatings = ratingsCount[currentDish.id] || { likes: 0, dislikes: 0 };
 
   return (
     <div className="min-h-screen bg-app-dark">
@@ -102,8 +102,8 @@ const Index = () => {
             key={currentDish.id}
             dish={currentDish}
             onSwipe={handleSwipe}
-            likesCount={likes}
-            dislikesCount={dislikes}
+            likesCount={currentRatings.likes}
+            dislikesCount={currentRatings.dislikes}
           />
         </div>
       </main>
