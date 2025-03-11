@@ -103,6 +103,11 @@ const Index = () => {
       <div className="min-h-screen bg-app-dark">
         <TopNav />
         <main className="pt-20 px-4 flex items-center justify-center h-[calc(100vh-5rem)]">
+          <p>Ordenes de pruebas (ocupar estos ejemplo para la captura de orden):</p>
+          <ul>
+            <li>ORD-20250311-8745</li>
+            <li>ORD-20250311-8746</li>
+          </ul>
           <OrderEntry onOrderSubmit={handleOrderSubmit} />
           {orderNumber && dishes?.length === 0 && (
             <div className="mt-4 text-center text-app-muted">
