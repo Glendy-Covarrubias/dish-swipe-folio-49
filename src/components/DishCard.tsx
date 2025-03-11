@@ -3,17 +3,20 @@ import { useState } from 'react';
 import { motion, PanInfo, useAnimation } from 'framer-motion';
 import { Star, X, Heart, MessageCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
 import { Dish } from '@/types/dish';
 
 interface DishCardProps {
   dish: Dish;
-  onSwipe: (direction: 'left' | 'right', dishId: string) => void;
+  onSwipe: (direction: 'left' | 'right', dishId: string, comment: string) => void;
   likesCount: number;
   dislikesCount: number;
 }
 
 const DishCard = ({ dish, onSwipe, likesCount, dislikesCount }: DishCardProps) => {
   const [isDragging, setIsDragging] = useState(false);
+  const [comment, setComment] = useState('');
+  const [showComment, setShowComment] = useState(false);
   const controls = useAnimation();
 
   const handleDragEnd = async (event: any, info: PanInfo) => {
@@ -27,11 +30,15 @@ const DishCard = ({ dish, onSwipe, likesCount, dislikesCount }: DishCardProps) =
         opacity: 0,
         transition: { duration: 0.3 }
       });
-      onSwipe(direction, dish.id);
+      onSwipe(direction, dish.id, comment);
     } else {
       controls.start({ x: 0, transition: { type: 'spring', stiffness: 300, damping: 20 } });
     }
     setIsDragging(false);
+  };
+
+  const toggleComment = () => {
+    setShowComment(!showComment);
   };
 
   return (
@@ -73,19 +80,37 @@ const DishCard = ({ dish, onSwipe, likesCount, dislikesCount }: DishCardProps) =
               </div>
             </div>
           </div>
+          
+          {showComment && (
+            <div className="mt-4">
+              <Textarea
+                placeholder="Add your comment about this dish..."
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                className="w-full bg-white/10 border-white/20 text-white placeholder:text-white/50 resize-none"
+                rows={3}
+              />
+            </div>
+          )}
         </div>
       </div>
       
       <div className="absolute bottom-0 left-0 right-0 flex justify-center gap-8 p-4">
         <button
+          className="p-4 rounded-full bg-gray-500/20 hover:bg-gray-500/30 transition-colors"
+          onClick={toggleComment}
+        >
+          <MessageCircle className="w-8 h-8 text-white" />
+        </button>
+        <button
           className="p-4 rounded-full bg-red-500/20 hover:bg-red-500/30 transition-colors"
-          onClick={() => onSwipe('left', dish.id)}
+          onClick={() => onSwipe('left', dish.id, comment)}
         >
           <X className="w-8 h-8 text-red-500" />
         </button>
         <button
           className="p-4 rounded-full bg-green-500/20 hover:bg-green-500/30 transition-colors"
-          onClick={() => onSwipe('right', dish.id)}
+          onClick={() => onSwipe('right', dish.id, comment)}
         >
           <Heart className="w-8 h-8 text-green-500" />
         </button>
