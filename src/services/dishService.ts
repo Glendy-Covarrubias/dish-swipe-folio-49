@@ -38,7 +38,11 @@ export const getDishRatings = async (dish_id: string): Promise<Rating[]> => {
     return [];
   }
   
-  return data || [];
+  // Cast the rating property to ensure it matches the 'like' | 'dislike' type
+  return data?.map(item => ({
+    ...item,
+    rating: item.rating as 'like' | 'dislike'
+  })) || [];
 };
 
 export const subscribeToRatings = (
