@@ -70,3 +70,6 @@ We don't support custom domains (yet). If you want to deploy your project under 
 
 ## Evidencias
 https://www.awesomescreenshot.com/video/37508447?key=bef9dc93a6c8ee350a673ddb168dc6de
+
+## Proyecto online
+https://dish-swipe-folio-49.lovable.app/
